@@ -1,0 +1,509 @@
+stapler:
+  functionality:
+  - can bind sheets of paper together
+  - can be used for organizing documents
+  affordances:
+  - handle for pressing down to staple
+  - opening for loading staples
+  physical_properties:
+  - typically made of metal or plastic
+  - dimensions range from 5 to 10 inches in length
+  - weight typically between 0.5 to 2 pounds
+  - may have a removable tray for staple loading
+  safety_considerations:
+  - should be kept out of reach of small children
+  common_associations:
+  - office environment
+  - school supplies
+  - stationery items
+  related_objects:
+  - staples
+  - staple remover
+  - paper clips
+  - notebooks
+  key_component:
+  - paper_insertion_part
+
+coffee_mug:
+  functionality:
+  - can hold liquids for drinking
+  - can be used for heating beverages in a microwave
+  - can serve as a container for small items (e.g., pens, pencils)
+  affordances:
+  - handle for grasping
+  - opening at top for pouring or sipping
+  - flat base for stability
+  physical_properties:
+  - typically made of ceramic, glass, or stainless steel
+  - dimensions usually range from 3 to 4 inches in height and 3 to 4 inches in diameter
+  - weight typically ranges from 8 to 16 ounces depending on material and size
+  - may have decorative features or designs
+  safety_considerations:
+  - may contain hot liquids causing burns
+  - liquid spillage may damage other objects
+  - can break if dropped
+  - ceramic mugs can chip, creating sharp edges
+  common_associations:
+  - morning coffee ritual
+  - office or home workspace
+  - social gatherings or coffee breaks
+  - gifts for special occasions
+  related_objects:
+  - coffee_cup_saucer
+  - coffee_machine
+  - coffee_pot
+  - coaster
+  - spoon
+  key_component:
+  - handle
+
+mug:
+  functionality:
+  - can hold liquids for drinking
+  - can be used for heating beverages in a microwave
+  - can serve as a container for small items (e.g., pens, pencils)
+  affordances:
+  - handle for grasping
+  - opening at top for pouring or sipping
+  - flat base for stability
+  physical_properties:
+  - typically made of ceramic, glass, or stainless steel
+  - dimensions usually range from 3 to 4 inches in height and 3 to 4 inches in diameter
+  - weight typically ranges from 8 to 16 ounces depending on material and size
+  - may have decorative features or designs
+  safety_considerations:
+  - may contain hot liquids causing burns
+  - liquid spillage may damage other objects
+  - can break if dropped
+  - ceramic mugs can chip, creating sharp edges
+  common_associations:
+  - morning coffee ritual
+  - office or home workspace
+  - social gatherings or coffee breaks
+  - gifts for special occasions
+  related_objects:
+  - coffee_cup_saucer
+  - coffee_machine
+  - coffee_pot
+  - coaster
+  - spoon
+  key_component:
+  - handle
+
+box_of_staples:
+  functionality:
+  - contains staples for use with staplers
+  - preserves and organizes staples until needed
+  - dispenses staples for refilling staplers
+  affordances:
+  - sliding or flip-top opening for accessing contents
+  - compact size for easy storage
+  - visible quantity indicator (transparent window or packaging)
+  physical_properties:
+  - typically made of cardboard, plastic, or metal
+  - dimensions usually range from 1 to 3 inches in length and 0.5 to 1.5 inches in width
+  - weight typically between 0.1 to 0.3 pounds when full
+  - contains multiple rows of staple strips
+  safety_considerations:
+  - small parts pose choking hazard for young children
+  - staples have sharp points that can cause minor injuries
+  - improper disposal can create puncture hazards
+  common_associations:
+  - office supplies
+  - document organization
+  - school supplies
+  - home office
+  related_objects:
+  - stapler
+  - paper
+  - documents
+  - folders
+  - staple remover
+
+phone:
+  functionality:
+  - enables communication through calls, text, and video
+  - provides access to internet and digital applications
+  - captures photos and videos
+  - plays and stores audio and video media
+  - tracks location and provides navigation
+  affordances:
+  - touchscreen for input and interaction
+  - buttons for power, volume control, and quick access
+  - ports for charging and accessories
+  - speakers and microphones for audio interaction
+  physical_properties:
+  - typically made of glass, metal, and/or plastic
+  - dimensions usually range from 5 to 7 inches in length and 2.5 to 3.5 inches in width
+  - weight typically between 4 to 8 ounces
+  - rechargeable battery with varying capacity
+  - screen occupies majority of front surface
+  safety_considerations:
+  - screen can crack or shatter when dropped
+  - potential distraction 
+  - privacy and security vulnerabilities
+  common_associations:
+  - social media and digital communication
+  - productivity and organization tools
+  - entertainment and media consumption
+  - photography and content creation
+  - constant connectivity
+  related_objects:
+  - charger/charging cable
+  - headphones/earbuds
+  - protective case
+  - screen protector
+  - power bank
+
+paper_tray:
+  functionality:
+  - holds and organizes sheets of paper
+  - facilitates paper storage for printers, copiers, and office use
+  - separates different types or sizes of paper
+  - enables easy access to paper supplies
+  - collects printed documents in output configurations
+  affordances:
+  - open top for easy paper insertion and removal
+  - adjustable guides for different paper sizes
+  - stackable design for multi-tray setups
+  - sliding or removable mechanism for printer integration
+  physical_properties:
+  - typically made of plastic, metal, or reinforced cardboard
+  - dimensions usually range from 8.5 to 12 inches in width and 11 to 18 inches in length
+  - weight typically between 0.5 to 3 pounds when empty
+  - may include dust cover or protective flap
+  - often has capacity indicators for paper level
+  safety_considerations:
+  - potential paper cuts when handling paper
+  - pinch points in sliding mechanisms
+  - can create tripping hazard if placed on floor
+  - plastic components may break if overloaded
+  common_associations:
+  - office equipment
+  - document management
+  - printing stations
+  - mail sorting
+  - administrative organization
+  related_objects:
+  - folders
+  key_component:
+  - opening
+
+usb_adapter:
+ functionality:
+ - converts between different USB port types (e.g., USB-A to USB-C)
+ - enables connection between incompatible USB devices
+ - transfers data between devices with different USB interfaces
+ - may provide charging capability for mobile devices
+ - extends compatibility of older peripherals with newer equipment
+ affordances:
+ - male USB connector for plugging into host device
+ - female USB connector for receiving peripheral device
+ - compact size for portability and minimal footprint
+ - may include indicator light for connection status
+ - designed for easy insertion and removal
+ physical_properties:
+ - primarily white plastic housing with metal USB connectors
+ - dimensions typically range from 0.5 to 2 inches in length and 0.5 to 1 inch in width
+ - weight usually between 0.1 to 0.3 ounces
+ - smooth surface finish typical of Apple or minimalist accessories
+ - may have brand logo or certification markings
+ safety_considerations:
+ - potential for electrical shorts if damaged or exposed to moisture
+ - metal connectors may scratch sensitive surfaces
+ - strain on ports if excessive force applied
+ - possible overheating with improper power delivery
+ - small size makes it easy to lose or misplace
+ common_associations:
+ - smartphone and tablet accessories
+ - laptop peripherals
+ - tech travel essentials
+ - device compatibility solutions
+ - Apple or Android ecosystem bridges
+ related_objects:
+ - computer
+ - smartphone
+ - external hard drive
+ - USB cables
+ - headphones
+
+white_usb_adapter:
+ functionality:
+ - converts between different USB port types (e.g., USB-A to USB-C)
+ - enables connection between incompatible USB devices
+ - transfers data between devices with different USB interfaces
+ - may provide charging capability for mobile devices
+ - extends compatibility of older peripherals with newer equipment
+ affordances:
+ - male USB connector for plugging into host device
+ - female USB connector for receiving peripheral device
+ - compact size for portability and minimal footprint
+ - may include indicator light for connection status
+ - designed for easy insertion and removal
+ physical_properties:
+ - primarily white plastic housing with metal USB connectors
+ - dimensions typically range from 0.5 to 2 inches in length and 0.5 to 1 inch in width
+ - weight usually between 0.1 to 0.3 ounces
+ - smooth surface finish typical of Apple or minimalist accessories
+ - may have brand logo or certification markings
+ safety_considerations:
+ - small size makes it easy to lose or misplace
+ common_associations:
+ - smartphone and tablet accessories
+ - laptop peripherals
+ - tech travel essentials
+ - device compatibility solutions
+ - Apple or Android ecosystem bridges
+ related_objects:
+ - computer
+ - external hard drive
+ - USB cables
+ - usb drive
+
+gluestick:
+ functionality:
+ - adheres paper and lightweight materials together
+ - provides clean, mess-free adhesive application
+ - enables temporary or permanent bonding depending on material
+ - allows for repositioning of items shortly after application
+ - creates invisible bond when dry
+ affordances:
+ - twistable base for advancing glue
+ - cap for preventing drying
+ - cylindrical shape for ergonomic grip
+ - flat application surface for even distribution
+ - protective inner seal on new products
+ physical_properties:
+ - typically made of plastic casing with solid adhesive core
+ - dimensions usually range from 3 to 5 inches in length and 0.5 to 1 inch in diameter
+ - weight typically between 0.5 to 2 ounces
+ - adhesive changes from solid to slightly tacky upon application
+ - often has a slight translucent appearance when applied
+ - dries clear on most surfaces
+ safety_considerations:
+ - cap must be secured to prevent drying
+ - may be sticky and may irritate skin if contact with skin
+ common_associations:
+ - school supplies and crafting
+ - scrapbooking and paper arts
+ - office organization
+ - children's projects
+ - temporary mounting of lightweight items
+ related_objects:
+ - scissors
+ - tape
+ - cardboard
+ - color paper
+
+knife:
+ functionality:
+ - cuts, slices, and dices food ingredients
+ - enables food preparation tasks 
+ affordances:
+ - handle for gripping
+ - blade for cutting
+ physical_properties:
+ - blade typically made of stainless steel, carbon steel, or ceramic
+ - handle made of wood, plastic, metal, or composite materials
+ - dimensions range from 3 inches (paring) to 14 inches (chef's) in total length
+ - weight typically between 1.5 to 10 ounces depending on type
+ safety_considerations:
+ - blade can be sharp and cause cuts
+ - blade point can cause puncture wounds
+ - requires proper storage in knife block or magnetic strip
+ - should be kept away from children
+ common_associations:
+ - cooking and food preparation
+ related_objects:
+ - cutting board
+ - food ingredients
+key_component:
+- blade
+
+tea-kettle-trivet-1:
+ functionality:
+ - protects surfaces from hot tea kettles and small pots
+ - provides heat insulation between small cookware and table/countertop
+ affordances:
+ - flat surface sized for tea kettles
+ - compact size for easy storage and tabletop use
+ physical_properties:
+ - small diameter of 4 to 5 inches (specifically sized for tea kettles)
+ - lightweight, usually under 1.5 ounces
+ - thickness approximately 0.5 inches
+ - petite circular shape proportioned for teapots and small vessels
+ safety_considerations:
+ - designed for tea kettles, may not provide enough support alone for heavy or large items
+ common_associations:
+ - kitchen counter protection
+ - placing hot items on surfaces
+ related_objects:
+ - hot pan
+ - tea kettle
+
+tea-kettle-trivet-2:
+ functionality:
+ - protects surfaces from hot tea kettles and small pots
+ - provides heat insulation between small cookware and table/countertop
+ affordances:
+ - flat surface sized for tea kettles
+ - compact size for easy storage and tabletop use
+ physical_properties:
+ - small diameter of 4 to 5 inches (specifically sized for tea kettles)
+ - lightweight, usually under 1.5 ounces
+ - thickness approximately 0.5 inches
+ - petite circular shape proportioned for teapots and small vessels
+ safety_considerations:
+ - designed for tea kettles, may not provide enough support alone for heavy or large items such as baking sheets
+ common_associations:
+ - kitchen counter protection
+ - placing hot items on surfaces
+ related_objects:
+ - hot pan
+ - tea kettle
+
+ box_of_chocolates:
+  functionality:
+  - contains chocolates for eating
+  - provides a sweet treat
+  affordances:
+  - openning for easy access to contents
+  physical_properties:
+  - made of cardboard
+  - dimensions usually range from 1 to 3 inches in length and 0.5 to 1.5 inches in width
+  - weight typically between 0.1 to 0.3 pounds when full
+  - contains many small pieces of chocolate
+  safety_considerations:
+  - small parts pose choking hazard for young children
+  common_associations:
+  - sweet treats
+  - chocolate
+  - candy
+  related_objects:
+  - chocolate
+  - sweet treats
+
+short_cables:
+  functionality:
+  - making connections between devices
+  affordances:
+  - male and female connectors
+  physical_properties:
+  - made of plastic
+  - dimensions usually range from 1 to 3 inches in length and 0.5 to 1.5 inches in width
+  common_associations:
+  - digital devices
+
+chess_set:
+  functionality:
+  - allows for playing chess
+  affordances:
+  - flat surface for playing
+  physical_properties:
+  - made of wood or plastic
+  - dimensions usually range from 1 to 3 inches in length and 0.5 to 1.5 inches in width  
+  related_objects:
+  - chess_pieces
+  - chess_timer
+  - chess_clock
+  - chess_book
+
+power_strip:
+  functionality:
+  - provides electrical outlets for charging devices
+  - distributes electrical power from a single source to devices
+  - enables organization of power connections in workspaces
+  affordances:
+  - multiple electrical outlets 
+  - power switch for controlling connected devices
+  - indicator light showing power status
+  - cord for connecting to wall outlet
+  physical_properties:
+  - typically made of plastic housing with metal electrical contacts
+  - dimensions usually range from 6 to 24 inches in length and 2 to 4 inches in width
+  - weight typically between 1 to 4 pounds depending on size and features
+  - may include USB ports for charging mobile devices
+  - cord length typically ranges from 3 to 15 feet
+  safety_considerations:
+  - potential electrical shock if damaged or exposed to moisture
+  - fire hazard if overloaded beyond rated capacity
+  common_associations:
+  - office workstations and computer setups
+  - home entertainment centers
+  - workshop and garage environments
+  - temporary power solutions for events
+  - backup power organization
+  related_objects:
+  - electrical cord
+  - computer
+  - monitor
+  - printer
+  - lamp
+  - charger
+  key_component:
+  - outlets
+
+tape_dispenser:
+  functionality:
+  - dispenses adhesive tape in controlled lengths
+  - cuts tape cleanly using built-in cutting edge
+  - holds tape roll securely for easy access
+  - enables precise tape application for crafting and office tasks
+  - provides consistent tape tension for smooth dispensing
+  affordances:
+  - weighted base for stability during one-handed operation
+  - serrated cutting edge for clean tape cuts
+  - spindle or core holder for tape roll mounting
+  - ergonomic design for comfortable gripping
+  - non-slip bottom surface to prevent sliding
+  physical_properties:
+  - typically made of plastic, metal, or combination materials
+  - dimensions usually range from 4 to 8 inches in length and 2 to 4 inches in width
+  - weight typically between 0.5 to 2 pounds depending on construction
+  - accommodates standard tape roll sizes (0.5 to 2 inches wide)
+  - cutting edge made of metal with sharp serrated teeth
+  - may feature transparent or colored housing
+  safety_considerations:
+  - sharp cutting edge can cause cuts if handled improperly
+  - should be kept away from young children due to cutting blade
+  - tape adhesive may leave residue on surfaces
+  - weighted base could cause injury if dropped
+  common_associations:
+  - crafting and scrapbooking projects
+  - gift wrapping and packaging
+  - office documentation and filing
+  - art projects and creative activities
+  - home organization tasks
+  - school supplies and classroom use
+  related_objects:
+  - adhesive_tape
+  - scissors
+  - gluestick
+  - wrapping_paper
+  - cardboard
+  - craft_supplies
+  - ribbon
+  key_component:
+  - cutting_edge
+
+pen_holder:
+  functionality:
+  - hold stationary items such as pens, pencils, glue sticks, etc.
+  affordances:
+  - opening for accessing items
+  physical_properties:
+  - dimensions can range from 8 to 12 inches in length and 3 to 6 inches in width
+  - often features a flat base for stability
+  safety_considerations:
+  - sharp objects like pencils or scissors may be present, for children
+  common_associations:
+  - crafting
+  - paper and pen writing 
+  - drawing and coloring
+  related_objects:
+  - glue stick
+  - pencils
+  - pens
+  - erasers
+  - rulers
+  - notebooks
