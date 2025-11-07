@@ -486,7 +486,7 @@ tape_dispenser:
   key_component:
   - cutting_edge
 
-pen_holder:
+pencil_box:
   functionality:
   - hold stationary items such as pens, pencils, glue sticks, etc.
   affordances:

@@ -1,0 +1,41 @@
+{
+  "source_coords": [
+    [
+      40,
+      63
+    ],
+    [
+      1235,
+      28
+    ],
+    [
+      1224,
+      382
+    ],
+    [
+      73,
+      401
+    ]
+  ],
+  "destination_coords": [
+    [
+      40,
+      63
+    ],
+    [
+      1235,
+      63
+    ],
+    [
+      1235,
+      412
+    ],
+    [
+      40,
+      412
+    ]
+  ],
+  "table_mask": "table04-mask.png",
+  "table_background": "table04-background.png",
+  "flip": true
+}

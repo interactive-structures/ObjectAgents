@@ -474,7 +474,7 @@ def main():
         print("Example: python script.py config.json")
         return
     
-    config_path = os.path.join("tablespaces", sys.argv[1])
+    config_path = os.path.join("config", sys.argv[1])
     
     # Initialize webcam
     cap = cv2.VideoCapture(0)

@@ -8,6 +8,7 @@ import cv2
 import numpy as np
 
 from camera import CameraCapture
+from controloop import ControlLoop
 
 
 class CameraDisplay:
@@ -17,6 +18,7 @@ class CameraDisplay:
         self,
         top_down_capture: CameraCapture,
         env_capture: CameraCapture,
+        motion_control_loop : ControlLoop,
         table_space=None,
         agent=None,
         display_width: int = 3456,
@@ -24,6 +26,7 @@ class CameraDisplay:
         window_name: str = "Object Agents",
         sleep: float = 0.05,
         enable_dev_window: bool = False,
+        additional_height: int = 0,
     ):
         """
         Initialize the camera display.
@@ -37,6 +40,7 @@ class CameraDisplay:
             display_height: Height of the display window
             window_name: Name of the display window
             enable_dev_window: Whether to show additional developer window with top-down view
+            additional_height: Additional height in pixels to add as black space at the bottom
         """
         self.top_down_capture = top_down_capture
         self.env_capture = env_capture
@@ -48,10 +52,11 @@ class CameraDisplay:
         self.sleep = sleep
         self.enable_dev_window = enable_dev_window
         self.dev_window_name = "Developer - Top Down View"
+        self.additional_height = additional_height
 
         # Fixed layout dimensions - manually adjust these values as needed
         self.camera_width = 640 #640
-        self.camera_height = 480 #480
+        self.camera_height = 360 #480
         self.right_panel_width = 1000
 
         # Click-based user position system
@@ -67,12 +72,16 @@ class CameraDisplay:
         self._button_positioned = False  # Track if button position is set
         
         self.y_perceive = 40
-        self.y_reason = 500
+        self.y_reason = 500 #500
         self.y_act = 780
 
         self.perceive_rect_h = 400
         self.reason_rect_h = 200
         self.act_rect_h = 200
+        
+        # Calculate panel height to accommodate all sections
+        # Panel height should be at least: y_act + act_rect_h
+        self.panel_height = max(self.camera_height * 2, self.y_act + self.act_rect_h)
         
         # Initialize the display window (resizable for projector setups)
         cv2.namedWindow(self.window_name, cv2.WINDOW_NORMAL)
@@ -89,10 +98,11 @@ class CameraDisplay:
         # Pre-create agent panel background with static elements
         self._init_agent_panel_background()
 
+        self.motion_control_loop = motion_control_loop
+
     def _init_agent_panel_background(self):
         """Pre-create the agent panel background with static rectangles and headers."""
-        panel_height = self.camera_height * 2  # Match height of stacked cameras
-        self.agent_panel_background = np.zeros((panel_height, self.right_panel_width, 3), dtype=np.uint8)
+        self.agent_panel_background = np.zeros((self.panel_height, self.right_panel_width, 3), dtype=np.uint8)
         
         # Draw black background
         self.agent_panel_background[:] = (0, 0, 0)
@@ -127,15 +137,30 @@ class CameraDisplay:
                 print("🖱️  Button clicked! Toggling mode...")
                 self._toggle_manual_mode()
             elif self.manual_selection_mode:
-                # Convert developer window coordinates to table coordinates
-                table_position = self._dev_coords_to_table_coords(x, y)
-                if table_position is not None:
-                    self.manual_user_position = table_position
-                    # Create a simple bounding box around the clicked point for visualization
-                    self.manual_user_bbox = self._create_manual_user_bbox(table_position)
-                    print(f"✅ Manual user position set at table coordinates: ({table_position[0]:.1f}, {table_position[1]:.1f})")
-                else:
-                    print("❌ Click outside frame area")
+
+                self.motion_control_loop.display_click_coord = [x, y]
+                self.manual_user_bbox = [
+                    [x, y],
+                    [x+10, y],
+                    [x+10, y+10],
+                    [x, y+10],
+                ]
+
+                # if self.instruction_queue is not None:
+                #     self.instruction_queue.put_nowait({
+                #         'active_object': 'stapler',
+                #         'target': f'coordinate_{x}_{y}',
+                #         'action': 'move_towards',
+                #     })
+
+                # # Convert developer window coordinates to table coordinates
+                # table_position = self._dev_coords_to_table_coords(x, y)
+                # if table_position is not None:
+                #     self.manual_user_position = table_position
+                #     # Create a simple bounding box around the clicked point for visualization
+                #     self.manual_user_bbox = self._create_manual_user_bbox(table_position)
+                #     print(f"✅ Manual user position set at table coordinates: ({table_position[0]:.1f}, {table_position[1]:.1f})")
+
             else:
                 print("ℹ️  Manual selection mode disabled. Click the toggle button to enable.")
 
@@ -185,6 +210,7 @@ class CameraDisplay:
         """Toggle manual selection mode on/off."""
         if self.manual_selection_mode:
             self.manual_selection_mode = False
+            self.motion_control_loop.display_click_coord = None
             print("🚪 Manual user selection mode DISABLED - returning to YOLO detection only")
         else:
             self.manual_selection_mode = True
@@ -203,7 +229,7 @@ class CameraDisplay:
         # Position button in top-right corner with some margin
         margin = 10
         button_x = frame_width - self.button_width - margin
-        button_y = margin + 60  # Below title
+        button_y = 330  # bottom of frame
         
         # Ensure button fits within frame
         if button_x < 0:
@@ -269,8 +295,8 @@ class CameraDisplay:
         thickness = 2
         
         # Top-down label (clean - no mode indicator)
-        cv2.putText(top_down_frame, "Agent view", (10, 30), font, font_scale, color, thickness)
-        cv2.putText(env_frame, "Planning view", (10, 30), font, font_scale, color, thickness)
+        cv2.putText(top_down_frame, "Planning view", (10, 30), font, font_scale, color, thickness)
+        cv2.putText(env_frame, "Agent view", (10, 30), font, font_scale, color, thickness)
 
         # Stack vertically
         left_column = np.vstack((top_down_frame, env_frame))
@@ -412,11 +438,11 @@ class CameraDisplay:
         reason_max_y = self.y_reason + self.reason_rect_h  # Bottom of reason rectangle
         reason_goal = outputs['reason'].get('goal', '')
         
-        # if reason_goal in ['N/A', 'Initializing...']:
-        #     # Show initializing message
-        #     initializing_text = "Initializing..."
-        #     y_current = self._draw_wrapped_text(panel, initializing_text, text_x_position, y_current + 10, font, 0.8, (128, 128, 128), normal_thickness, max_text_width, small_line_height, reason_max_y)
-        if reason_goal and len(reason_goal) > 50:  # If goal is long, wrap it too
+        if reason_goal in ['N/A', 'Initializing...']:
+            # Show initializing message
+            initializing_text = "Initializing..."
+            y_current = self._draw_wrapped_text(panel, initializing_text, text_x_position, y_current + 10, font, 0.8, (128, 128, 128), normal_thickness, max_text_width, small_line_height, reason_max_y)
+        elif reason_goal and len(reason_goal) > 50:  # If goal is long, wrap it too
             y_current = self._draw_wrapped_text(panel, reason_goal, text_x_position, y_current +10, font, 0.8, text_color, normal_thickness, max_text_width, small_line_height, reason_max_y)
 
         # ACT section - redraw header with dynamic color based on alignment status
@@ -432,12 +458,11 @@ class CameraDisplay:
         act_max_y = self.y_act + self.act_rect_h  # Bottom of act rectangle
         justification_body = outputs['act'].get('justification', '')
         
-        # if justification_body in ['N/A', 'Initializing...']:
-        #     # Show initializing message
-        #     initializing_text = "Initializing..."
-        #     y_current = self._draw_wrapped_text(panel, initializing_text, text_x_position, y_current, font, 0.8, (128, 128, 128), normal_thickness, max_text_width, small_line_height, act_max_y)
-        # elif
-        if justification_body:
+        if justification_body in ['N/A', 'Initializing...']:
+            # Show initializing message
+            initializing_text = "Initializing..."
+            y_current = self._draw_wrapped_text(panel, initializing_text, text_x_position, y_current, font, 0.8, (128, 128, 128), normal_thickness, max_text_width, small_line_height, act_max_y)
+        elif justification_body:
             justification_text = justification_body
             just_thickness = 3 if act_passed else normal_thickness
             y_current = self._draw_wrapped_text(panel, justification_text, text_x_position, y_current, font, 0.8, text_color, just_thickness, max_text_width, small_line_height, act_max_y)
@@ -478,13 +503,25 @@ class CameraDisplay:
 
         # Compose left column (two camera frames stacked vertically)
         left_column = self._compose_left_column(top_down_frame, env_frame)
+        
+        # Pad left column to match panel height if needed
+        left_column_height = left_column.shape[0]
+        if left_column_height < self.panel_height:
+            padding_height = self.panel_height - left_column_height
+            padding = np.zeros((padding_height, left_column.shape[1], 3), dtype=np.uint8)
+            left_column = np.vstack((left_column, padding))
 
-        # Create agent panel with fixed dimensions
-        panel_height = self.camera_height * 2  # Match height of stacked cameras
-        agent_panel = self._create_agent_panel(self.right_panel_width, panel_height)
+        # Create agent panel with calculated dimensions to fit all sections
+        agent_panel = self._create_agent_panel(self.right_panel_width, self.panel_height)
 
         # Combine left (cameras) and right (text panel)
         full_display = np.hstack((left_column, agent_panel))
+
+        # Add additional black height at the bottom if specified
+        if self.additional_height > 0:
+            _, current_width = full_display.shape[:2]
+            black_padding = np.zeros((self.additional_height, current_width, 3), dtype=np.uint8)
+            full_display = np.vstack((full_display, black_padding))
 
         return full_display
 
@@ -551,7 +588,7 @@ class CameraDisplay:
             # Build full path starting at current centroid
             try:
                 points = [obj.centroid.astype(np.int32)] + [np.asarray(wp, dtype=np.int32) for wp in waypoints]
-                print(f"waypoints: {waypoints}")
+                # print(f"waypoints: {waypoints}")
             except Exception:
                 continue
 
@@ -576,9 +613,25 @@ class CameraDisplay:
         if transformed_frame is None:
             return
             
+
+        obstacle_map = self.table_space.construct_obstacle_map(r_expand=10, use_known_objects=True).copy()
+        obstacle_map = cv2.cvtColor(obstacle_map, cv2.COLOR_GRAY2BGR)
+
+        ## NEW ISSUE #####################################################
+        # Resize obstacle_map to match transformed_frame dimensions
+        if transformed_frame.shape[:2] != obstacle_map.shape[:2]:
+            obstacle_map = cv2.resize(obstacle_map, (transformed_frame.shape[1], transformed_frame.shape[0]), interpolation=cv2.INTER_NEAREST)
+        ###############################################################
+
+        #overlay the obstacle map on the transformed frame
+        alpha = 0.5  # Transparency factor
+        beta = 1 - alpha
+        gamma = 0  # Scalar added to each sum
+
         # Create a copy for the developer window
-        dev_frame = transformed_frame.copy()
-        
+        # dev_frame = transformed_frame.copy()
+        dev_frame = cv2.addWeighted(transformed_frame, alpha, obstacle_map, beta, gamma)
+                                     
         # Draw all visualizations on the developer frame (including manual user)
         dev_frame = self._draw_dev_bounding_boxes_on_frame(dev_frame)
         dev_frame = self._draw_paths_on_frame(dev_frame)
@@ -644,8 +697,8 @@ class CameraDisplay:
     def _add_developer_overlays(self, frame):
         """Add developer-specific information overlays to the frame."""
         font = cv2.FONT_HERSHEY_SIMPLEX
-        font_scale = 0.7
-        thickness = 2
+        font_scale = 0.2
+        thickness = 1
         
         height, width = frame.shape[:2]
         
@@ -655,9 +708,9 @@ class CameraDisplay:
             self._button_positioned = True
         
         # Add developer window title
-        title_text = "DEVELOPER WINDOW"
-        title_color = (0, 255, 255) if self.manual_selection_mode else (255, 255, 255)
-        cv2.putText(frame, title_text, (10, 30), font, 0.8, title_color, thickness)
+        # title_text = "DEVELOPER WINDOW"
+        # title_color = (0, 255, 255) if self.manual_selection_mode else (255, 255, 255)
+        # cv2.putText(frame, title_text, (10, 30), font, 0.8, title_color, thickness)
         
         # Draw toggle button
         self._draw_toggle_button(frame)
@@ -671,14 +724,14 @@ class CameraDisplay:
             mode_color = (128, 128, 128)
         cv2.putText(frame, mode_text, (10, height - 60), font, font_scale, mode_color, thickness)
         
-        # Add frame info
-        info_text = f"Frame: {width}x{height}"
-        cv2.putText(frame, info_text, (10, height - 90), font, font_scale, (255, 255, 255), thickness)
+        # # Add frame info
+        # info_text = f"Frame: {width}x{height}"
+        # cv2.putText(frame, info_text, (10, height - 90), font, font_scale, (255, 255, 255), thickness)
         
-        # Add user position info
-        if self.manual_user_position is not None:
-            pos_text = f"Manual User: ({self.manual_user_position[0]:.1f}, {self.manual_user_position[1]:.1f})"
-            cv2.putText(frame, pos_text, (10, height - 120), font, font_scale, (0, 255, 255), thickness)
+        # # Add user position info
+        # if self.manual_user_position is not None:
+        #     pos_text = f"Manual User: ({self.manual_user_position[0]:.1f}, {self.manual_user_position[1]:.1f})"
+        #     cv2.putText(frame, pos_text, (10, height - 120), font, font_scale, (0, 255, 255), thickness)
         
         # Add YOLO user position if available
         if (self.table_space.user is not None and 
@@ -732,7 +785,7 @@ class CameraDisplay:
                 bbox_int = np.array(obj.bbox, dtype=np.int32)
 
                 # Draw the oriented bounding box
-                cv2.polylines(frame, [bbox_int], True, color, 6)
+                cv2.polylines(frame, [bbox_int], True, color, 4)
 
                 # Draw object name and confidence
                 centroid = obj.centroid
@@ -751,7 +804,7 @@ class CameraDisplay:
             bbox_int = np.array(user.bbox, dtype=np.int32)
 
             # Draw the bounding box
-            cv2.polylines(frame, [bbox_int], True, color, 6)
+            cv2.polylines(frame, [bbox_int], True, color, 4)
 
             # Draw user label and confidence
             centroid = user.centroid

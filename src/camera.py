@@ -38,7 +38,8 @@ def frame_to_openai_format(frame_rgb: np.ndarray) -> str:
 
 class CameraCapture:
     def __init__(
-        self, index: int | str, width: int = 640, height: int = 480, sleep: float = 0.1
+        # self, index: int | str, width: int = 640, height: int = 480, sleep: float = 0.1
+        self, index: int | str, width: int = 640, height: int = 360, sleep: float = 0.1
     ) -> Self:
         self.cap = cv2.VideoCapture(index)
         self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, width)
@@ -152,11 +153,11 @@ class CameraCapture:
 #     return ordered_unique
 
 
-def init_camera(TOP_DOWN_CAMERA_INDEX, ENV_CAMERA_INDEX, agent_loop_debugging, env_video_path) -> tuple[CameraCapture, CameraCapture]:
+def init_camera(TOP_DOWN_CAMERA_INDEX, ENV_CAMERA_INDEX, agent_loop_debugging = False, env_video_path = None) -> tuple[CameraCapture, CameraCapture]:
     # Use env overrides if provided; otherwise the module defaults
     # env_indices = _parse_env_indices()
     # indices: list[int] = env_indices[:2] if len(env_indices) >= 2 else [TOP_DOWN_CAMERA_INDEX, ENV_CAMERA_INDEX]
-    
+
     # top_down_capture = CameraCapture(indices[0])
     # env_capture = CameraCapture(indices[1])
     if agent_loop_debugging:

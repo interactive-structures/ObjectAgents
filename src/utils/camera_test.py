@@ -6,7 +6,7 @@ import cv2
 def test_triple_camera():
     # Initialize three camera captures
     cap1 = cv2.VideoCapture(0)  # First camera
-    cap2 = cv2.VideoCapture(1)  # Second camera
+    cap2 = cv2.VideoCapture(0)  # Second camera
 
     # Check if first two cameras opened successfully
     if not cap1.isOpened():
@@ -27,12 +27,12 @@ def test_triple_camera():
 
     # Set some basic properties
     cap1.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-    cap1.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+    cap1.set(cv2.CAP_PROP_FRAME_HEIGHT, 360)
     cap2.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-    cap2.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+    cap2.set(cv2.CAP_PROP_FRAME_HEIGHT, 360)
     if use_third_camera:
         cap3.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
-        cap3.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
+        cap3.set(cv2.CAP_PROP_FRAME_HEIGHT, 360)
 
     try:
         while True:

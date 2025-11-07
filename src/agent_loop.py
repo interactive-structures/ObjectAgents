@@ -2,6 +2,7 @@ import asyncio
 import json
 import time
 from collections.abc import Callable
+from asyncio import Queue, QueueFull
 
 import numpy as np
 
@@ -39,6 +40,7 @@ class Agent:
         on_alignment_update: Callable[[float], None] | None = None,
         on_action_plan: Callable[[dict], None] | None = None,
         alignment_threshold: float = 0.5,
+        instruction_queue : asyncio.Queue | None = None,
     ):
         self.frame_descriptor = FrameDescriptor()
         self.narrator = Narrator()
@@ -64,15 +66,18 @@ class Agent:
         # Store latest agent outputs for display
         self.latest_outputs = {
             'perceive': {'activity': 'Initializing...', 'summary': 'Initializing...', 'narration': [], 'timestamp': 0},
-            'reason': {'goal': '', 'timestamp': 0},
+            'reason': {'goal': 'Initializing...', 'timestamp': 0},
             'act': {
-                'action': '',
-                'justification': '',
+                'action': 'Initializing...',
+                'justification': 'Initializing...',
                 'alignment_score': None,
                 'alignment_passed': False,
                 'timestamp': 0,
             }
         }
+
+        # Communicate to motion controller.
+        self.instruction_queue = instruction_queue
 
     async def loop(self):
         await self.env_capture.ready()
@@ -262,8 +267,6 @@ class Agent:
         #             'action': action_output.action,
         #         })
 
-        #     except Exception as e:
-        #         print(f"action plan callback error: {e}")
 
         """
             Step 3.2 ACTION: check action-goal alignment
@@ -272,24 +275,35 @@ class Agent:
             user_goal, narrator_output.sequence_summaries, action_output.justification
         )
         alignment_checker_output = await self.alignment_checker.query(alignment_checker_input)
-        # # Emit alignment score to control loop
-        # try:
-        #     score_value = alignment_checker_output.score
-        #     if score_value is not None and self.on_alignment_update is not None:
-        #         self.on_alignment_update(float(score_value))
-        # except Exception as e:
-        #     print(f"alignment callback error: {e}")
-        score_value_f = float(alignment_checker_output.score) if alignment_checker_output.score is not None else None
+
+        # # If aligned, then send instruction to motion control loop.
+        # if alignment_checker_output.score > self.alignment_threshold:
+        #     try:
+        #         self.instruction_queue.put_nowait(instruction)
+        #     except Full:
+        #         self.instruction_queue.get()
+        #         self.instruction_queue.put_nowait(instruction)
+
+        # Update latest act outputs with alignment results
+        try:
+            score_value_f = float(alignment_checker_output.score) if alignment_checker_output.score is not None else None
+        except Exception:
+            score_value_f = None
         passed = (score_value_f is not None) and (score_value_f >= self.alignment_threshold)
         action_plan_to_send = {
-                                    'object_to_move': action_output.object_to_move,
+                                    'active_object': action_output.object_to_move,
                                     'target': action_output.target,
                                     'action': action_output.action,
                                 }
         if passed:
             print(f"Alignment passed with score: {score_value_f}\n")
             print(f"Sending action plan to control loop: {action_plan_to_send}\n")
-            # TODO: a function to send target and action to control loop
+
+            try:
+                self.instruction_queue.put_nowait(action_plan_to_send)
+            except asyncio.QueueFull:
+                self.instruction_queue.put_nowait(action_plan_to_send)
+                self.instruction_queue.get_nowait()
 
             # Store act outputs for display 
             self.latest_outputs['act'] = {

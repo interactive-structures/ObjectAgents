@@ -1,0 +1,13 @@
+{
+  "source_coords": [
+    [23,16],[1201,9],
+    [1186,386],[42,389]
+  ],
+  "destination_coords": [
+    [23,16],[1201,16],
+    [1201,392], [23,392]
+  ],
+  "table_mask": "./assets/table03-mask.png",
+  "table_background": "./assets/table03-background.png",
+  "flip": false
+}

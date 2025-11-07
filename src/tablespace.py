@@ -36,7 +36,6 @@ class TableSpace:
     def __init__(self,
                  top_down_capture: CameraCapture,
                  scene_config_path,
-                 video : str = None, 
                  ):
 
         self.top_down_capture = top_down_capture
@@ -58,6 +57,9 @@ class TableSpace:
             config["destination_coords"]['bot_r'],
             config["destination_coords"]['bot_l']
         ], dtype=np.float32)
+
+        # Store reference to bottom edge
+        self.bottom_y = dst_points[3][1] / 2
 
         # Obtain mask and background images for the scene
         filepath_mask = config['table_mask']
@@ -82,9 +84,6 @@ class TableSpace:
         self.empty_table_map = cv2.threshold(
             self.transform_table(self.table_mask), 127, 255, cv2.THRESH_BINARY_INV)[1]
 
-        # for debugging
-        self.custom_preview = None
-
         self.yolo_object_detection_model = config['obj_detection_model']
 
         self.yolo_person_detection_model = config['person_detection_model']
@@ -108,11 +107,22 @@ class TableSpace:
         # read known objects once
         for object_name in config["active_objects"]:
             object_info = config["active_objects"][object_name]
+
+            motor_info = config["motor_params"][object_name]
+            if motor_info is not None:
+                motor_range_r = (motor_info[0], motor_info[1])
+                motor_range_l = (motor_info[2], motor_info[3])
+            else:
+                motor_range_r = (50, 70)
+                motor_range_l = (45, 65)
+
             ob = PhysicalObject(
                 name = object_name,
                 uuid = object_info.get('uuid', ''),
                 device_name = object_info.get('device_name', ''),
-                heading_offset = object_info.get('heading_offset', 0.0))
+                heading_offset = object_info.get('heading_offset', 0.0),
+                motor_range_r=motor_range_r,
+                motor_range_l=motor_range_l)
 
             self.known_objects.append(ob)
         for object_name in config["non_active_objects"]:
@@ -221,6 +231,8 @@ class TableSpace:
     def track_known_objects(self, frame):
 
         results = self.yolo_obb.track(frame, persist=True, verbose=False)[0]
+        
+        # print("obj detection model: ", self.yolo_obb)
         if len(results.obb) == 0:
             # No objects this frame: clear detected sets
             self.detected_robotic_objects.clear()
@@ -231,6 +243,7 @@ class TableSpace:
         boxes = results.obb.xyxyxyxy.cpu().numpy()
         xywhr = results.obb.xywhr.cpu().numpy()
         classes = results.obb.cls.cpu()
+
         confs = results.obb.conf.cpu()
         ids = results.obb.id.int().cpu().tolist() if results.obb.id is not None else []
 
@@ -244,7 +257,7 @@ class TableSpace:
             confidence = confs[i]
             # if class_id > 9:
             #     continue
-            if confidence < 0.8:
+            if confidence < 0.2:
                 continue
 
             # find object that matches the ID
@@ -252,7 +265,7 @@ class TableSpace:
             # self.known_objects stores all objects that are on the table
             for ob in self.known_objects:
                 if ob.yolo_id == ids[i]:
-     
+
                     detected_object = ob
                     break
 
@@ -390,8 +403,6 @@ class TableSpace:
         else:
             map = self.full_map
 
-        self.custom_preview = map.copy()
-
         # Expand obstacles (Use object radius)
         kernel_size = (r_expand*2 + 1, r_expand*2 + 1)
         kernel_expand = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, kernel_size)
@@ -410,7 +421,7 @@ class TableSpace:
 
 async def main():
     from camera import init_camera
-    top_down_capture, _= init_camera()
+    top_down_capture, _= init_camera(0, 0)
     table = TableSpace(top_down_capture, "config/scene_config.yaml")
     tasks = [
         top_down_capture.loop(),

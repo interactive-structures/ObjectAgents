@@ -1,50 +1,91 @@
 # models to use for object detection and person detection
-obj_detection_model: models/obb-0928-6pm.pt
+# obj_detection_model: models/obb-0928-6pm.pt
+# person_detection_model: models/yolo11n.pt
+
+# yolo_class_mapping:
+#   0: stapler
+#   1: pen_holder
+#   2: coffee_mug
+#   3: tape_dispenser
+#   4: power_strip
+
+obj_detection_model: models/obb-1106.pt
+# obj_detection_model: models/obb-0929-11am.pt
 person_detection_model: models/yolo11n.pt
 
 yolo_class_mapping:
-  0: stapler
-  1: pen_holder
+  0: old_stapler
+  1: pencil_box
   2: coffee_mug
-  3: tape_dispenser
-  4: power_strip
+  3: staple_box
+  4: paper_tray
+  5: white_adapter
+  6: phone
+  7: gluestick
+  8: stapler
+  9: electric_stapler
 
-# source coordinates for perspective transform
-source_coords:
-  top_l: [48, 14]
-  top_r: [1215, 18]
-  bot_l: [1200, 393]
-  bot_r: [52, 386]
+# # source coordinates for perspective transform
+# source_coords:
+#   top_l: [48, 14]
+#   top_r: [1215, 18]
+#   bot_l: [1200, 393]
+#   bot_r: [52, 386]
+source_coords: 
+  top_l: [40,63]
+  top_r: [1235,28]
+  bot_l: [1224,382]
+  bot_r: [73,401]
 
-# destination coordinates for perspective transform
-destination_coords:
-  top_l: [40, 14]
-  top_r: [1215, 14]
-  bot_l: [1215, 388]
-  bot_r: [40, 388]
+# # destination coordinates for perspective transform
+# destination_coords:
+#   top_l: [40, 14]
+#   top_r: [1215, 14]
+#   bot_l: [1215, 388]
+#   bot_r: [40, 388]
+destination_coords: 
+  top_l: [40,63]
+  top_r: [1235,63]
+  bot_l: [1235,412]
+  bot_r: [40,412]
 
+flip: true
 # defines table boundaries (objects can only move within black area)
-table_mask: config/table01-mask.png
+table_mask: config/table04-mask.png
 
 # image of table without any objects, used for background subtraction
-table_background: config/table01-background.png
+table_background: config/table04-background.png
 
 # list of active objects in the scene
 active_objects:
+  # coffee_mug:
+  #   uuid: ""
+  #   device_name: "agent_coffee_mug"
+  # pen_holder:
+  #   uuid: ""
+  #   device_name: "agent_pen_holder_backup"
   stapler:
     uuid: ""
-    device_name: "agent_coffee_mug"
-  # pen_holder:
-  #   uuid: "99546580-50C3-FDEF-D082-CC0719786C4E"
-  #   device_name: "agent_pen_holder"
+    device_name: "agent_stapler"
+
+  pencil_box:
+    uuid: ""
+    device_name: "agent_pen_holder"
 
 # list of all other objects that are relevant to this scene
 non_active_objects:
 
-  - coffee_mug
   - pen_holder
   - power_strip
   - tape_dispenser
 
   # - gluestick
   # - phone
+
+motor_params:
+  stapler: [50, 70, 45, 65]
+  power_strip: [70, 85, 50, 75]
+  # power_strip: [60, 80, 48, 68]
+  # pen_holder: [54, 70, 48, 62]
+  coffee_mug: [0, 0, 0, 0]
+  pencil_box: [54, 70, 48, 62]

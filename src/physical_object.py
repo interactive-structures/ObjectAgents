@@ -10,7 +10,14 @@ MOTOR_CHARACTERISTIC_UUID = "bc464776-c843-48e9-8320-ac820ecd96b8"
 class PhysicalObject:
     name: str
 
-    def __init__(self, name: str, uuid:str = '', device_name:str = '', heading_offset:float = 0):
+    def __init__(
+            self,
+            name: str,
+            uuid:str = '',
+            device_name : str = '',
+            heading_offset : float = 0,
+            motor_range_r = (50, 70),
+            motor_range_l = (45, 65)):
         """
         Initialize a physical object.
         Args:
@@ -40,7 +47,7 @@ class PhysicalObject:
         self.behavior_index = 0
 
         # Calculate unique motion primitives (used for routefinding)
-        self.primitives = routefinding.generate_simple_primitives(step_size=10)
+        self.primitives = routefinding.generate_simple_primitives(step_size=5)
 
         # Only initialize BLE if a UUID is provided (active objects)
         self.ble = DifferentialDriveController(uuid, device_name) if self.is_active else None
@@ -51,6 +58,11 @@ class PhysicalObject:
             [np.cos(heading_offset), -np.sin(heading_offset)],
             [np.sin(heading_offset),  np.cos(heading_offset)]
         ])
+
+        self.motor_range_r = motor_range_r
+        self.motor_range_l = motor_range_l
+
+        self.stall_count = 0
 
     @property
     def centroid(self):
@@ -86,10 +98,14 @@ class PhysicalObject:
         # record inital centroid
         centroid_inital = self.centroid
 
+        print(self.motor_range_r)
+        print(self.motor_range_l)
+
         # move fwd
         print('Moving Forward...')
-        await self.ble.send_motor_command([150, 0, 150, 0])
-        await asyncio.sleep(0.05)
+        await self.ble.send_motor_command(
+            [self.motor_range_r[1], 0, self.motor_range_l[1], 0])
+        await asyncio.sleep(0.5)
         await self.ble.send_motor_command([0, 0, 0, 0])
 
         # stop and wait, then record new orientation
@@ -98,16 +114,32 @@ class PhysicalObject:
 
         # move back
         print('Moving Backward...')
-        await self.ble.send_motor_command([0, 150, 0, 150])
-        await asyncio.sleep(0.05)
+        await self.ble.send_motor_command(
+            [0, self.motor_range_r[1], 0, self.motor_range_l[1]])
+        await asyncio.sleep(0.5)
         await self.ble.send_motor_command([0, 0, 0, 0])
 
         # stop and wait, then record orientation again
         await asyncio.sleep(1)
         centroid_after_bck = self.centroid
 
-        print(centroid_inital, centroid_after_fwd, centroid_after_bck)
+        # calculate heading vector
+        forward_vector = centroid_after_fwd - centroid_after_bck
+        forward_vector = forward_vector / np.linalg.norm(forward_vector)
 
+        print(centroid_after_fwd, centroid_after_bck, forward_vector)
+        print("self.major_axis", self.major_axis)
+        print("forward_vector", forward_vector)
+        heading_offset = signed_heading_error(self.major_axis, forward_vector)
+        print(f'Offset: {heading_offset}')
+
+        # recalcuate axis_to_heading
+        self.axis_to_heading = np.array([
+            [np.cos(heading_offset), -np.sin(heading_offset)],
+            [np.sin(heading_offset),  np.cos(heading_offset)]
+        ])
+
+        print(self.axis_to_heading)
         self.orientation_is_uncertain = False
 
 
@@ -189,7 +221,7 @@ class PhysicalObject:
             return
 
         heading_error_threshold = 0.5
-        distance_error_threshold = 20
+        distance_error_threshold = 10
 
         while True:
             # get current waypoint from path
@@ -206,17 +238,37 @@ class PhysicalObject:
                 else:
                     # We have arrived at the final waypoint
                     await self.turn_off_motors()
+
+                    # Clear all waypoints
+                    self.waypoints = []
+
+                    # Go to next behavior
                     self.behavior_index += 1
+
                     return
 
             # We are not yet at the waypoint
             else:
                 break
 
+        # Check to see if we have stalled.
+
+        if self.last_centroid is not None:
+            movement_delta = np.linalg.norm(self.last_centroid - self.centroid)            
+            if movement_delta < 2:
+                self.stall_count += 1
+                if self.stall_count > 20:
+                    # abort
+                    self.stall_count = 0
+                    await self.turn_off_motors()
+                    self.behavior_index += 1
+                    return
+
+        else:
+            self.stall_count = 0
 
         # Use distance to waypoint to calculate target heading
         target_heading = np.arctan2(position_error[1], position_error[0])
-
 
         current_orientation = np.arctan2(self.heading[1], self.heading[0])
 
@@ -225,42 +277,45 @@ class PhysicalObject:
         self.heading_error = heading_error
 
         abs_error = np.abs(self.heading_error)
-        
-        motor_full = 60
-        motor_off = 50
 
         if self.heading_error < 0:
             # Object needs to turn left. Keep the right motor at full power,
             # and gradually decrease the left motor as error increases.
-            motor_r = motor_full
+            motor_r = self.motor_range_r[1]
 
             error_normalized = np.min([abs_error / heading_error_threshold, 1.0])
-            motor_range = motor_full - motor_off
-            motor_l = motor_full - (error_normalized * motor_range)
-            if motor_l < motor_off + 1: motor_l = 0
+            motor_range = self.motor_range_l[1] - self.motor_range_l[0]
+            motor_l = self.motor_range_l[1] - (error_normalized * motor_range)
+            if motor_l < self.motor_range_l[0] + 1: motor_l = 0
 
             await self.ble.send_motor_command([int(motor_r), 0, int(motor_l), 0])
+            print(motor_r, motor_l)
 
         elif self.heading_error > 0:
             # Object needs to turn RIGHT. Keep the LEFT motor at full power,
             # and gradually decrease the RIGHT motor as error increases.
-            motor_l = motor_full
+            motor_l = self.motor_range_l[1]
 
             error_normalized = np.min([abs_error / heading_error_threshold, 1.0])
-            motor_range = motor_full - motor_off
-            motor_r = motor_full - (error_normalized * motor_range)
-            if motor_r < motor_off + 1: motor_r = 0
+            motor_range = self.motor_range_r[1] - self.motor_range_r[0]
+            motor_r = self.motor_range_r[1] - (error_normalized * motor_range)
+            if motor_r < self.motor_range_r[0] + 1: motor_r = 0
 
             await self.ble.send_motor_command([int(motor_r), 0, int(motor_l), 0])
+            print(motor_r, motor_l)
+
 
         else:
-            await self.ble.send_motor_command([motor_full,0,motor_full,0])
+            await self.ble.send_motor_command(
+                [self.motor_range_r[1], 0, self.motor_range_l[0], 0])
+            print(motor_r, motor_l)
+
 
         self.last_centroid = self.centroid
+
     
 
     def plan_path_towards(self, table, destination_coord, omit=[]):
-
 
         map = table.construct_obstacle_map(r_expand=30, use_known_objects=True, omit=[self]+omit)
 
@@ -273,17 +328,19 @@ class PhysicalObject:
             destination_coord[1],
             goal_threshold
         )
-        
+    
         heuristic_fn = routefinding.make_heuristic_NEAR(
             destination_coord[0],
             destination_coord[1]
         )
-        print("physical object's plan_path_towards is called, calling plan_and_refine_path")
+
         path = self.plan_and_refine_path(map, start_pos, start_orientation, goal_fn, heuristic_fn)
 
         if path and len(path) > 1:
             self.waypoints = path[1:]
-            print("### plan path towards self.waypoints", self.waypoints)
+
+        print(f'Destination: {destination_coord}')
+        print(f'Path: {path}')
 
 
     def plan_path_away(self, table, repelling_coord):
@@ -312,7 +369,6 @@ class PhysicalObject:
         
     
     def plan_and_refine_path(self, map, start_pos, start_orientation, goal, heuristic):
-        print(f"Planning path from {start_pos} to {goal}")
         path = routefinding.astar_with_motion_primitives(
             int(start_pos[0]), int(start_pos[1]), start_orientation,
             goal,
@@ -323,7 +379,6 @@ class PhysicalObject:
 
         if not path: 
             print("No path found")
-            #
             return None
 
         path_refined = routefinding.line_of_sight_optimization(path, map)
@@ -411,6 +466,7 @@ class DifferentialDriveController:
         if not self.is_connected or self.client is None or not self.client.is_connected:
             # raise RuntimeError("BLE client not connected; cannot send motor command")
             print("BLE client not connected; cannot send motor command")
+            self.is_connected = False
             
         try:
             command = bytearray([
